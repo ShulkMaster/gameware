@@ -51,7 +51,7 @@ From the Deception MAP and the host split configurations:
 gameware/
   rw3.2.0.0/       MKDA RenderWare (GMKE5D)
   rw3.6.0.3/       MKD RenderWare (GQNE5D)
-  tools/           CI checks
+  tools/           host build check
 ```
 
 Each version tree contains:
@@ -62,23 +62,16 @@ rwX/
   include/gameware/   headers, included as "gameware/<name>.h"
 ```
 
-## CI
+## Tools
 
 Host decomps use this repository as the `extern/gameware` submodule. Each
-host's decides which units it builds and links.
+host decides which units it builds and links.
 
-One job per host, building the host's `main` branch:
-
-| Host decomp | Version | Tree |
-| --- | --- | --- |
-| `ShulkMaster/mk-deception` | `GQNE5D` | `rw3.6.0.3` |
-| `ShulkMaster/mk-da` | `GMKE5D` | `rw3.2.0.0` |
-
-`tools/check_rw.py` places the commit under test at the host's
+`tools/check_rw.py` places a gameware checkout at a host's
 `extern/gameware` path and:
 
 1. Builds the host unchanged, including its retail SHA-1 check, so every
    unit the host links must still match.
-2. Reports code and data match per unit and whether the host links it. On
-   pull requests it also builds the base commit and marks each unit as new,
-   improved, or regressed.
+2. Reports code and data match per unit and whether the host links it. With
+   `--baseline` it also builds a second gameware checkout and marks each unit
+   as new, improved, or regressed.
