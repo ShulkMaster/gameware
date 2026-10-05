@@ -1,0 +1,7 @@
+# Build outputs and local scratch
+build/
+.scratches/
+*.o
+.idea/
+
+__pycache__/

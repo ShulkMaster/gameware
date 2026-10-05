@@ -1,0 +1,69 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/shulkmaster/mk-da-build:main
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - host: ShulkMaster/mk-deception
+            version: GQNE5D
+          - host: ShulkMaster/mk-da
+            version: GMKE5D
+
+    steps:
+      - name: Checkout gameware
+        uses: actions/checkout@v4
+        with:
+          path: gameware
+          fetch-depth: 0
+
+      - name: Checkout ${{ matrix.host }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.host }}
+          ref: main
+          path: host
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Checkout PR baseline
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE/gameware"
+          base_sha="$(git -C gameware merge-base HEAD "origin/${BASE_REF}")"
+          echo "Comparing against ${base_sha} (${BASE_REF} merge base)"
+          git -C gameware worktree add --detach "$GITHUB_WORKSPACE/gameware-base" "$base_sha"
+
+      - name: Build and check in ${{ matrix.host }}
+        run: |
+          baseline=""
+          if [ -d gameware-base ]; then baseline="--baseline gameware-base"; fi
+          python3 gameware/tools/check_rw.py gameware host ${{ matrix.version }} \
+            $baseline --summary "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload progress report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.version }}_report
+          path: host/build/${{ matrix.version }}/report.json
+          if-no-files-found: ignore
