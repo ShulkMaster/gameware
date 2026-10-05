@@ -3,18 +3,30 @@
 
 #include "runtime/cfile.h"
 
+typedef int (*RWCBRwfexist)(char *);
+typedef FILE *(*RWCBFopen)(const char *, const char *);
+typedef int (*RWCBFclose)(FILE *);
+typedef size_t (*RWCBFread)(void *, size_t, size_t, FILE *);
+typedef size_t (*RWCBFwrite)(const void *, size_t, size_t, FILE *);
+typedef char *(*RWCBFgets)(char *, int, FILE *);
+typedef int (*RWCBFputs)(const char *, FILE *);
+typedef int (*RWCBFeof)(FILE *);
+typedef int (*RWCBFseek)(FILE *, u32, int);
+typedef int (*RWCBFflush)(FILE *);
+typedef long (*RWCBFtell)(FILE *);
+
 typedef struct RWbafsysUnk00 {
-    int (*unk00)(char *);
-    FILE *(*unk04)(const char *, const char *);
-    int (*unk08)(FILE *);
-    size_t (*unk0C)(void *, size_t, size_t, FILE *);
-    size_t (*unk10)(const void *, size_t, size_t, FILE *);
-    char *(*unk14)(char *, int, FILE *);
-    int (*unk18)(const char *, FILE *);
-    int (*unk1C)(FILE *);
-    int (*unk20)(FILE *, u32, int);
-    int (*unk24)(FILE *);
-    long (*unk28)(FILE *);
+    RWCBRwfexist unk00;
+    RWCBFopen unk04;
+    RWCBFclose unk08;
+    RWCBFread unk0C;
+    RWCBFwrite unk10;
+    RWCBFgets unk14;
+    RWCBFputs unk18;
+    RWCBFeof unk1C;
+    RWCBFseek unk20;
+    RWCBFflush unk24;
+    RWCBFtell unk28;
 } RWbafsysUnk00;
 
 enum {
